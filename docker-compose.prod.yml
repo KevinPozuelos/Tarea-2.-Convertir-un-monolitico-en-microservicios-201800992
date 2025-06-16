@@ -1,0 +1,91 @@
+services:
+  nasts-server:
+    image: nats:latest
+    ports:
+      - "8222:8222"
+    
+
+
+  client-gateway:
+    build: 
+      context: ./client-gateway
+      dockerfile: dockerfile.prod
+    image: northamerica-south1-docker.pkg.dev/sa-proyecto-457400/sa-ms/client-gateway
+    ports:
+        - "3000:3000"
+    environment:
+      - PORT=3000
+      - NATS_SERVERS=nats://nasts-server:4222
+
+
+  user-ms:
+    build:
+      context: ./control-user
+      dockerfile: dockerfile.prod
+    image: northamerica-south1-docker.pkg.dev/sa-proyecto-457400/sa-ms/user-ms  
+    environment:
+      - DB_NAME=SA_User
+      - JWT_SECRET=l4mhakrpozuel
+      - EMAIL=knot.kevin@gmail.com
+      - PORT=3002
+      - DOMAIN_NAME=client-gateway:3000
+      - NATS_SERVERS=nats://nasts-server:4222
+  
+  product-ms:
+    build:
+      context: ./project-producto
+      dockerfile: dockerfile.prod
+    image: northamerica-south1-docker.pkg.dev/sa-proyecto-457400/sa-ms/product-ms
+    environment:
+      - DB_NAME=Product-SA
+      - DB_PW=L4mhyK33v@L
+      - DB_USER=postgres
+      - DB_HOST=host.docker.internal
+      - DB_PORT=5432
+      - JWT_SECRET=l4mhakrpozuel
+      - DB_PROD=SA_Product
+      - NATS_SERVERS=nats://nasts-server:4222
+
+  Orders-ms:
+    build:
+      context: ./project-orders
+      dockerfile: dockerfile.prod
+    image: northamerica-south1-docker.pkg.dev/sa-proyecto-457400/sa-ms/order-ms
+    environment:
+      - DB_NAME=order-SA
+      - DB_PW=L4mhyK33v@L
+      - DB_USER=postgres
+      - DB_HOST=host.docker.internal
+      - DB_PORT=5432
+      - JWT_SECRET=l4mhakrpozuel
+      - DB_PROD=SA_Product
+      - NATS_SERVERS=nats://nasts-server:4222
+
+  Orders-detail-ms:
+    build:
+      context: ./project--detail-orders
+      dockerfile: dockerfile.prod
+    image: northamerica-south1-docker.pkg.dev/sa-proyecto-457400/sa-ms/order-detail-ms
+    environment:
+      - DB_NAME=order-SA
+      - DB_PW=L4mhyK33v@L
+      - DB_USER=postgres
+      - DB_HOST=host.docker.internal
+      - DB_PORT=5432
+      - JWT_SECRET=l4mhakrpozuel
+      - DB_PROD=SA_Product
+      - NATS_SERVERS=nats://nasts-server:4222
+    
+    Payments-ms:
+      build:
+        context: ./project-payments
+        dockerfile: dockerfile.prod
+      image: northamerica-south1-docker.pkg.dev/sa-proyecto-457400/sa-ms/payments-ms
+      environment:
+        - DB_NAME=paymentsr-SA
+        - DB_PW=L4mhyK33v@L
+        - DB_USER=postgres
+        - DB_HOST=host.docker.internal
+        - DB_PORT=5432
+        - DB_PROD=SA_Product
+        - NATS_SERVERS=nats://nasts-server:4222
